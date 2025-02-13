@@ -1,0 +1,3 @@
+data/
+ETF_minquotes.parquet
+model.pth
