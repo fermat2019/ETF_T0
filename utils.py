@@ -99,13 +99,36 @@ class ETFIntradayStrategy:
                  stop_loss_ratio = 0.02,  #止损比例
                    ):
         """
-        :param data: DataFrame, 包含分钟级别的交易数据，index为datetime，至少有open，close，factor_name列(factor_name列已经标准化为0-1）
-        :param factor_name: str,因子值的列名
-        :param periods: list, 信号作用的时间段
-        :param window: int,计算分位数的滚动窗口大小
-        :param 
-        :param buy_bound: float,买入信号的阈值，这里的阈值可以是一个序列
-        :param sell_bound: float,卖出信号的阈值
+        :param data: DataFrame, 包含分钟级别的交易数据，index为datetime类型，表示交易时间，
+                     至少需要包含open（开盘价）、close（收盘价）和以factor_name命名的列，
+                     其中factor_name列的数据已经标准化到0 - 1的范围。
+        :param factor_name: str, 因子值的列名，用于在data DataFrame中定位因子数据，
+                            该因子将作为生成交易信号的依据。
+        :param direction: int, 交易方向，默认值为1。1表示做多，-1表示做空，
+                          用于确定策略是进行多头交易还是空头交易。
+        :param periods: list, 信号作用的时间段，列表中的每个元素是一个元组，
+                        元组包含两个字符串，分别表示时间段的开始时间和结束时间，
+                        例如 ('09:59','10:59') 表示从09:59到10:59这个时间段内信号有效。
+        :param rolling_is_rank: bool, 是否使用滚动排序作为分位数的计算方式，
+                                默认为True。如果为True，则使用滚动排序计算分位数；
+                                否则使用其他方式计算。
+        :param rolling_window: int, 滚动排序窗口大小，默认为480。在计算滚动分位数时，
+                               会使用过去rolling_window个数据点进行排序和分位数计算。
+        :param bound_is_series: bool, upper_bound与lower_bound是否是序列，
+                                默认为False。如果为True，则upper_bound和lower_bound
+                                应该是与data长度相同的序列；如果为False，则它们是固定的数值。
+        :param upper_bound: float or Series, 分位数上界，默认为0.8。当因子值超过该上界时，
+                            可能会触发相应的交易信号，如做多信号。如果bound_is_series为True，
+                            则该参数应为Series类型。
+        :param lower_bound: float or Series, 分位数下界，默认为0.2。当因子值低于该下界时，
+                            可能会触发相应的交易信号，如做空信号。如果bound_is_series为True，
+                            则该参数应为Series类型。
+        :param upper_stop_bound: float, 多仓止损分位数，默认为0.5。当多仓的因子值低于该分位数时，
+                                 可能会触发多仓止损操作。
+        :param lower_stop_bound: float, 空仓止损分位数，默认为0.5。当空仓的因子值高于该分位数时，
+                                 可能会触发空仓止损操作。
+        :param stop_loss_ratio: float, 止损比例，默认为0.02。当持仓的亏损达到该比例时，
+                                会触发止损操作，以控制风险。
         """
         self.data = data.copy()
         self.factor_name = factor_name
