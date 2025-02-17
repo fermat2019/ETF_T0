@@ -1,13 +1,17 @@
 SEED: 42
 SEQ_LEN: 30
 SEQ_GAP: 10
-FACTOR_LIST: ['open','high','low','close','volume']
-HIDDEN_SIZE: 32
+FACTOR_LIST: ['close_lower_bound','close_BOLLup_4hour','MACD_1hour_4hour','RSI_1hour','ret_volume_corr_4hour','volume_std_1hour','amihud_10min']
+
+EMBEDDING_DIM: 7
+HIDDEN_SIZE: 16
+Q: 10
 NUM_LAYERS: 1
 LABEL_NAME: htc_ret
 BATCH_SIZE: 64
-NUM_EPOCHS: 10
-LEARNING_RATE: 0.001
+NUM_EPOCHS: 100
+EARLY_STOPPING_PATIENCE: 10
+LEARNING_RATE: 0.01
 
 TRAIN:
   START_DATE: 2022-02-14
