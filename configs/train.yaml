@@ -1,0 +1,48 @@
+SEED: 42
+SEQ_LEN: 30
+SEQ_GAP: 1
+ROLLING_WINDOW: 1200
+FACTOR_LIST: ['vwap',
+              'HML',
+              'ret_min_abs',
+              'volume_ratio',
+              'amihud_mean_10min',
+              'amihud_vwap_corr_1hour',
+              'HML_vwap_corr_4hour',
+              'HMC_CML_mean_4hour',
+              'ret_volume_corr_4hour',
+              'RSI_1hour',
+              'MACD_1hour_4hour',
+              'close_BOLLup_4hour',
+              'close_upper_bound',
+              'ADL_1hour']
+EMBEDDING_DIM: 10
+HIDDEN_SIZE: 16
+QUERY_SIZE: 10
+NUM_LAYERS: 1
+LABEL_NAME: htc_ret
+BATCH_SIZE: 64
+NUM_EPOCHS: 100
+EARLY_STOPPING_PATIENCE: 5
+LEARNING_RATE: 0.0005
+WEIGHT_DECAY: 0.01
+
+TRAIN2022:
+  START_DATE: 2022-02-14
+  END_DATE: 2023-02-11
+
+VALID2022:
+  START_DATE: 2023-02-12
+  END_DATE: 2023-05-12
+
+TRAIN2023:
+  START_DATE: 2023-02-14
+  END_DATE: 2024-02-11
+
+VALID2023:
+  START_DATE: 2024-02-12
+  END_DATE: 2024-05-12
+
+TEST:
+  START_DATE: 2023-02-12
+  END_DATE: 2025-02-11
