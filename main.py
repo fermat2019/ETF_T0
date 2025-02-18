@@ -122,7 +122,6 @@ class ALSTM(nn.Module):
         output, (hn, cn) = self.LSTMLayer(input)
         output = self.dropout1(output)
         a_s = self.AttentionLayer(output)
-        a_s = self.dropout1(a_s)
         e_s = torch.cat([a_s,output[:,-1,:]],dim = 1)
         #y = self.tanh(self.final_map(e_s)) #输出为(-1,1)之间的值
         #y = self.final_map(e_s)
@@ -246,18 +245,21 @@ if __name__ == '__main__':
         minquotes = {'F588080': F588080, 'F159915': F159915}
         factor_list = args.FACTOR_LIST + ['time']
 
-        iterator = zip([('Train_data_2022','Train_label_2022'),('Train_data_2023','Train_label_2023'),
+
+        
+        for fc in minquotes.keys():
+            print(f'Processing {fc}...')
+            minquotes[fc].loc[:,'htc_ret'] = minquotes[fc].groupby(minquotes[fc].index.date).apply(lambda x:x['close'].iloc[-1]/x['open'].shift(-1)-1).values
+            minquotes[fc] = CalcFinalFactors(minquotes[fc])  #计算因子值
+            for factor in args.FACTOR_LIST:
+                minquotes[fc][factor] = minquotes[fc][factor].rolling(args.ROLLING_WINDOW, min_periods=240).rank(pct=True)
+
+            iterator = zip([('Train_data_2022','Train_label_2022'),('Train_data_2023','Train_label_2023'),
                 ('Valid_data_2022','Valid_label_2022'),('Valid_data_2023','Valid_label_2023'),
                 ('Test_data','Test_label')],
                 [(args.TRAIN2022.START_DATE,args.TRAIN2022.END_DATE),(args.TRAIN2023.START_DATE,args.TRAIN2023.END_DATE),
                 (args.VALID2022.START_DATE,args.VALID2022.END_DATE),(args.VALID2023.START_DATE,args.VALID2023.END_DATE),
                 (args.TEST.START_DATE,args.TEST.END_DATE)])
-        
-        for fc in minquotes.keys():
-            minquotes[fc].loc[:,'htc_ret'] = minquotes[fc].groupby(minquotes[fc].index.date).apply(lambda x:x['close'].iloc[-1]/x['open'].shift(-1)-1).values
-            minquotes[fc] = CalcFinalFactors(minquotes[fc])  #计算因子值
-            for factor in args.FACTOR_LIST:
-                minquotes[fc][factor] = minquotes[fc][factor].rolling(args.ROLLING_WINDOW, min_periods=240).rank(pct=True)
             
             for (data_name, label_name), (startdate, enddate) in iterator:
                 temp_minquotes = minquotes[fc].loc[(minquotes[fc].index.date >= startdate) & \
