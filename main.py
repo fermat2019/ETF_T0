@@ -28,7 +28,7 @@ def make_dataset(Fund_data, seq_len, factor_list, label_name, FillNAN = False, s
     ## 这里可能需要考虑填充nan值
     data = []
     label = []
-    Fund_data = Fund_data[Fund_data.index.strftime('%H:%M')<='14:49']
+    Fund_data = Fund_data[Fund_data.index.strftime('%H:%M')<='14:54']
     Fund_data.loc[:,'time'] = Fund_data.groupby(Fund_data.index.date)['close'].cumcount().astype(float)+1
     Fund_data.loc[:,'time'] = Fund_data.groupby(Fund_data.index.date)['time'].transform(lambda x: x/x.sum())
     #Fund_data[label_name] = Fund_data[label_name].apply(lambda x: 0 if x<=0 else(1 if x>0 else np.nan))  #用于计算分类熵
