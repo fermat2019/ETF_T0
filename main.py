@@ -122,6 +122,7 @@ class ALSTM(nn.Module):
         output, (hn, cn) = self.LSTMLayer(input)
         output = self.dropout1(output)
         a_s = self.AttentionLayer(output)
+        #a_s = self.dropout1(a_s)  #加一个dropout层
         e_s = torch.cat([a_s,output[:,-1,:]],dim = 1)
         #y = self.tanh(self.final_map(e_s)) #输出为(-1,1)之间的值
         #y = self.final_map(e_s)

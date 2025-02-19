@@ -199,7 +199,7 @@ class ETFIntradayStrategy:
         self.upper_stop_bound = upper_stop_bound
         self.lower_stop_bound = lower_stop_bound
         self.stop_loss_ratio = stop_loss_ratio
-        self.fee_rate = 0  # 先不考虑手续费率  单边万分之一
+        self.fee_rate = 5e-5  # 考虑手续费率  单边万分之0.5
         self.generate_position()
 
     def get_position(self,temp):
@@ -211,6 +211,10 @@ class ETFIntradayStrategy:
         temp.loc[:,'Openpos'] = (temp.index>OpenTime)  # 判断是否已开仓
         temp.loc[:,'Openprice'] = temp.loc[temp['Openpos'],'open'].iloc[0]  # 记录开仓价格
         temp.loc[:,'Holdret'] = temp['close']/temp['Openprice']-1  # 计算持仓收益
+        #temp.loc[(temp.index>OpenTime),'Maxprice'] = (temp['close']*temp['Openpos']).rolling(240,min_periods=1).max() # 计算持仓期间的最大收益
+        #temp.loc[:,'Maxdrawdown'] = temp['close']/temp['Maxprice']-1  # 计算持仓期间的最大收益
+        # 这里的止损比例设置为最大回撤不能低于2%
+        #temp.loc[:,'Stoploss'] = temp['Maxdrawdown']>-self.stop_loss_ratio  # 判断是否触发收益止损比例
         temp.loc[:,'Stoploss'] = temp['Holdret']>-self.stop_loss_ratio  # 判断是否触发收益止损比例
         if direction == 1:  #这里还需要乘上有效时间段
             temp.loc[:,'Stopsignal'] = temp[self.factor_name] >= temp[f'{self.factor_name}_upper_stop_bound']  # 判断是否触发信号止损分位数
@@ -278,7 +282,7 @@ class ETFIntradayStrategy:
         dailyperformance = pd.DataFrame()
         dailyperformance['direction'] = self.data['position'].groupby(self.data.index.date).apply(lambda x: x[x != 0].iloc[0] if len(x[x!=0])>0 else 0)
         dailyperformance['holdingmins'] = self.data['position'].groupby(self.data.index.date).apply(lambda x: (x != 0).sum())
-        dailyperformance['dailyret'] = self.data['ret'].groupby(self.data.index.date).apply(lambda x: (x + 1).prod())-self.fee_rate*(dailyperformance['holdingmins']>0)-1
+        dailyperformance['dailyret'] = self.data['ret'].groupby(self.data.index.date).apply(lambda x: (x + 1).prod())*(1-self.fee_rate*(dailyperformance['holdingmins']>0))**2-1
         
         print(f"平均持仓时间: {dailyperformance['holdingmins'].mean():.2f} 分钟")
         print(f"平均每日交易次数: {(dailyperformance['holdingmins']>0).sum()/len(dailyperformance):.2f}")
